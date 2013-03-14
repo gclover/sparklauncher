@@ -1,0 +1,50 @@
+#! /usr/bin/python
+
+import os
+import glob
+import sys
+import string
+import subprocess
+from optparse import OptionParser
+
+def runcmd(cmd):
+	print cmd
+	#os.system(cmd)
+"""
+	try:
+		p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		stdout = p.stdout.read();
+		stderr = p.stderr.read();
+    
+		if p.stdout.close() == '-m' and  p.stderr.close() == '-m':
+			return True,stdout,stderr
+		else:
+			return False,stdout,stderr
+	except OSError,e:
+		return False,e
+"""
+
+def findfile(pattern):
+	for file in glob.glob(pattern):
+		return file
+	return ''
+
+def main():
+	hadoop_home = os.environ.get('HADOOP_HOME')
+	launcher_home = os.environ.get('SPARK_LAUNCHER_HOME')
+	
+	launcher_jar = findfile(launcher_home + 'lib/sparklauncher-*.jar') or \
+									findfile(launcher_home + 'target/sparklauncher-*.jar')
+	scala_archive = findfile(launcher_home + 'dep/scala*.zip')
+	spark_archive = findfile(launcher_home + 'dep/spark*.zip')
+	
+	cmd = """ %s/bin/hadoop jar %s com.allyes.sparklauncher.Launcher -scala_archive %s -spark_archive %s %s
+					""" % (hadoop_home, launcher_jar, scala_archive, spark_archive, string.join(sys.argv[1:], ' '))
+	runcmd(cmd)
+
+if __name__ == '__main__':
+	sys.exit(main())
+
+	
+	
+	
